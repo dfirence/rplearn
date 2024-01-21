@@ -26,6 +26,10 @@ const fromString = string => {
   source$.unsubscribe()
 }
 
+const fromSet = _set => {
+  const source$ = from(_set).subscribe(show)
+  source$.unsubscribe()
+}
 // Any primitive that has a .length property
 // can work with the rxjs `from()` operator.
 const main = () => {
@@ -42,5 +46,8 @@ const main = () => {
 
   const string = 'Lorem Ipsum'
   fromString(string)
+
+  const s = new Set(['a', 'b', 'c'])
+  fromSet(s)
 }
 main()

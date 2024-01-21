@@ -1,0 +1,11 @@
+{
+    "arrowParens": "always",
+    "bracketSpacing": true,
+    "editor.formatOnSave": true,
+    "requireConfig": false,
+    "semi": false,
+    "singleQuote": true,
+    "tabs": true,
+    "tabWidth": 2,
+    "trailingComma": "es5"
+}

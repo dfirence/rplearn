@@ -14,15 +14,20 @@ const cbShowProcessNames = record => {
   console.log(`${time}|${pguid}|${pid}|${process}`)
 }
 
-const flattenApiResponse = x => {
+const cbEmitWithDelay = x => {
+  const DELAY = 50
+  return of(x).pipe(delay(DELAY))
+}
+
+const cbFlattenApiResponse = x => {
   let response_size = x.data.length
   return from(x.data).pipe(
     take(response_size),
     concatMap(x => from(x.Sysmon))
   )
 }
+
 const fetchData = url => {
-  const DELAY = 50
   const INTERVAL = 10_000
   // Run every N seconds
   const cycles$ = interval(INTERVAL)
@@ -36,7 +41,7 @@ const fetchData = url => {
     const source$ = Axios.get(url)
       .pipe(
         // Flatten Network Api Response
-        concatMap(x => flattenApiResponse(x)),
+        concatMap(cbFlattenApiResponse),
         // Exclude Sysmon Events By Process Guid
         filter(x => !cache.has(x.context.scguid)),
         // Update Cache with New Process & Return Record
@@ -45,7 +50,7 @@ const fetchData = url => {
           return x
         }),
         // Emit every record on a set Delay
-        concatMap(x => of(x).pipe(delay(DELAY)))
+        concatMap(cbEmitWithDelay)
       )
       .subscribe(cbShowProcessNames)
   })

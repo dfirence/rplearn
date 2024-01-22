@@ -1,5 +1,10 @@
+#! /usr/bin/env node
+
+'use strict'
+
 import { from, of } from 'rxjs'
-import { concatMap, delay, filter, map, mergeMap, take } from 'rxjs/operators'
+import { concatMap, delay, filter, map, take } from 'rxjs/operators'
+
 import data from '../datasamples/dc1.json' assert { type: 'json' }
 
 const cbShowProcessNames = record => {
@@ -13,13 +18,14 @@ const cbShowProcessNames = record => {
 const emitUniqueValuesWithDelay = collection => {
   const DELAY = 50
   const cache = new Set()
+  const collection_size = collection.length
   const source$ = from(collection)
-    // Take the all item from the collection, emmits complete
-    .pipe(take(collection.length))
     // Transform collection
     .pipe(
+      // Take the all items from the collection, emmits complete
+      take(collection_size),
       // Extract the sub array of sysmon entries
-      mergeMap(records => from(records.Sysmon)),
+      concatMap(records => records.Sysmon),
       // Select only the processes that are not in the cache by guid
       filter(record => !cache.has(record.context.scguid)),
       // Update cache and return the sysmon entry
@@ -27,10 +33,13 @@ const emitUniqueValuesWithDelay = collection => {
         cache.add(record.context.scguid)
         return record
       }),
+      // Emit record based on DELAY
       concatMap(record => of(record).pipe(delay(DELAY)))
     )
     .subscribe(cbShowProcessNames)
 }
+
+// Entry Point
 const main = () => {
   emitUniqueValuesWithDelay(data)
 }

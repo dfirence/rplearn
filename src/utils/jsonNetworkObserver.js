@@ -23,8 +23,9 @@ const flattenApiResponse = x => {
 }
 const fetchData = url => {
   const DELAY = 50
-  // Run every 3 seconds
-  const cycles$ = interval(10_000)
+  const INTERVAL = 10_000
+  // Run every N seconds
+  const cycles$ = interval(INTERVAL)
   // Initiate Recurring Run
   cycles$.subscribe(() => {
     // Clear Screen
